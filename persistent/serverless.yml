@@ -1,0 +1,76 @@
+
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: 
+  name: samsabase # NOTE: update this with your service name
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: eu-central-1
+
+plugins:
+  - serverless-plugin-scripts
+  - "@anttiviljami/serverless-stack-output" # Logs stack outputs into terminal
+  #- serverless-plugin-stack-outputs
+
+custom:
+  userPoolName: ${self:service}-user-pool
+  bucketName: ${self:service}-frontendbucket
+  # Needed for serverless-stack-output plugin
+  output: 
+    handler: scripts/output.handler # Same syntax as you already know
+    file: ../stacks/persistent.json # toml, yaml, yml, and json format is available
+  scripts:
+    hooks:
+      'before:remove:remove': gulp clearBucket #&& exit 1
+      'remove:remove': gulp clean
+
+# Creating Resources like buckets, user pools, IAMs etc.
+resources:
+  - ${file(resources/cognito.yml)}
+  - ${file(resources/iam.yml)}
+  - ${file(resources/dynamo.yml)}
+  - ${file(resources/s3.yml)}
+  - Outputs:
+      UserPoolId:
+        Value:
+          Ref: CognitoUserPoolUserPool
+      UserPoolName:
+        Value: ${self:custom.userPoolName}
+      UserPoolArn:
+        Value: !GetAtt [CognitoUserPoolUserPool, Arn]
+      UserPoolClient:
+        Value:
+          Ref: UserPoolFrontendClient
+      BucketName:
+        Value: ${self:custom.bucketName}
+      WebsiteURL:
+        Value: !GetAtt [CustomS3Bucket, WebsiteURL]
+      # LambdaAdminRole:
+      #   Value: !GetAtt [LambdaRole, Arn]
+      MailRole:
+        Value: !GetAtt [MailRole, Arn]
+      AssignRole:
+        Value: !GetAtt [AssignRole, Arn]
+      SubscriptionRole:
+        Value: !GetAtt [SubscriptionRole, Arn]
+      ResellerRole:
+        Value: !GetAtt [ResellerRole, Arn]
+      UserVerifyRole:
+        Value: !GetAtt [UserVerifyRole, Arn]

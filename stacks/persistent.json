@@ -1,0 +1,15 @@
+{
+  "WebsiteURL": "http://samsabase-frontendbucket.s3-website.eu-central-1.amazonaws.com",
+  "IAMRoleArn": "arn:aws:iam::668263842056:role/LambdaAdminRole",
+  "UserPoolArn": "arn:aws:cognito-idp:eu-central-1:668263842056:userpool/eu-central-1_262HInSwH",
+  "ResellerRole": "arn:aws:iam::668263842056:role/ResellerRole",
+  "ServerlessDeploymentBucketName": "samsabase-dev-serverlessdeploymentbucket-1j8fjgrlfqg2l",
+  "UserPoolName": "samsabase-user-pool",
+  "MailRole": "arn:aws:iam::668263842056:role/MailRole",
+  "UserPoolId": "eu-central-1_262HInSwH",
+  "BucketName": "samsabase-frontendbucket",
+  "AssignRole": "arn:aws:iam::668263842056:role/AssignRole",
+  "SubscriptionRole": "arn:aws:iam::668263842056:role/SubscriptionRole",
+  "UserVerifyRole": "arn:aws:iam::668263842056:role/UserVerifyRole",
+  "UserPoolClient": "3qie4mjmln31n43556pc11udl6"
+}

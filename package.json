@@ -1,0 +1,27 @@
+{
+  "name": "restapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "preinstall": "npm install -g gulp-cli serverless@1.35.1",
+    "postinstall": "cd volatile/website/res && npm install",
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "persistent": "cd persistent && serverless deploy",
+    "persistent-remove": "cd persistent && serverless remove --aws-profile rootProfile",
+    "volatile": "cd volatile && serverless deploy --aws-profile devProfile",
+    "volatile-remove": "cd volatile && serverless remove --aws-profile rootProfile",
+    "full": "npm run persistent && npm run volatile",
+    "full-remove": "npm run persistent-remove && npm run volatile-remove"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anttiviljami/serverless-stack-output": "^0.3.1",
+    "delete": "^1.1.0",
+    "gulp": "^4.0.0",
+    "gulp-s3-upload": "^1.7.1",
+    "gulp-string-replace": "^1.1.2",
+    "serverless-plugin-scripts": "^1.0.2"
+  }
+}

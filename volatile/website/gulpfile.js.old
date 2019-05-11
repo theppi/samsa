@@ -1,0 +1,57 @@
+const { series, src, dest } = require('gulp'),
+    awsCred = require("../aws-credentials.json"),
+    s3 = require('gulp-s3-upload')(awsCred),
+    awsS3 = require("aws-sdk").S3,
+    del = require('delete');
+
+function upload() {
+    return src("./client/dist/**/*")
+        .pipe(s3({
+            Bucket: 'samsabase-frontendbucket', //  Required
+            ACL:    'public-read'       //  Needs to be user-defined
+        }, {
+            maxRetries: 5
+        },{uploadNewFilesOnly: false}))
+    ;
+}
+
+function remove(cb) {
+    let s3 = new awsS3();
+    let params = {Bucket: 'samsabase-frontendbucket'};
+      
+    s3.listObjects(params, function(err, data) {
+        if (err) {
+            console.log(err, err.stack); 
+            cb();
+        }
+        if(!data || !data.Contents || data.Contents.length == 0) cb();
+        params.Delete = {};
+        params.Delete.Objects = data.Contents.map(x => {
+            return {Key: x.Key};
+        });
+        s3.deleteObjects(params, function(err, data) {
+            if(err) {
+                console.log(err, err.stack);
+                cb();
+            }
+            delete params.Delete;
+            // Check here if bucket is empty and redo if not
+            s3.listObjects(params, function(err, data) {
+                if(err) {
+                    console.log(err, err.stack);
+                    cb();
+                }
+                if(data.Contents.length == 0) {
+                    cb();
+                } else {
+                    remove(cb);
+                }
+            });
+        });
+    });
+
+    cb();
+}
+
+exports.upload = upload;
+exports.remove = remove;

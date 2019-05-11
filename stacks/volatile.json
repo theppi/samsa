@@ -1,0 +1,10 @@
+{
+  "CleverbridgeLambdaFunctionQualifiedArn": "arn:aws:lambda:eu-central-1:668263842056:function:samsa-dev-cleverbridge:15",
+  "UserVerifyLambdaFunctionQualifiedArn": "arn:aws:lambda:eu-central-1:668263842056:function:samsa-dev-userVerify:13",
+  "SubscriptionsLambdaFunctionQualifiedArn": "arn:aws:lambda:eu-central-1:668263842056:function:samsa-dev-subscriptions:25",
+  "MailLambdaFunctionQualifiedArn": "arn:aws:lambda:eu-central-1:668263842056:function:samsa-dev-mail:25",
+  "PurchaseAssignLambdaFunctionQualifiedArn": "arn:aws:lambda:eu-central-1:668263842056:function:samsa-dev-purchaseAssign:13",
+  "ServiceEndpoint": "https://xmozuwzdrb.execute-api.eu-central-1.amazonaws.com/dev",
+  "ServerlessDeploymentBucketName": "samsa-dev-serverlessdeploymentbucket-u9xnlvxfje7",
+  "PurchaseVerifyLambdaFunctionQualifiedArn": "arn:aws:lambda:eu-central-1:668263842056:function:samsa-dev-purchaseVerify:12"
+}

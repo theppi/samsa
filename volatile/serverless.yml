@@ -1,0 +1,162 @@
+
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service: 
+  name: samsa
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: eu-central-1
+# service wide environment variables can be defined here
+  environment:
+    REGION: ${self:provider.region}
+
+plugins:
+  - "@anttiviljami/serverless-stack-output" # Logs stack outputs into terminal
+  - serverless-plugin-scripts
+
+custom:
+  userPoolName: ${self:service}-user-pool
+  # Needed for serverless-stack-output plugin
+  constants: ${file(../stacks/persistent.json)}
+  output: 
+    handler: scripts/output.handler # Same syntax as you already know
+    file: ../stacks/volatile.json # toml, yaml, yml, and json format is available
+  scripts:
+      hooks:
+        'after:deploy:finalize': gulp postDeploy && cd website && gulp && gulp upload
+        'after:remove:remove': gulp emptyBucket
+  
+
+# Creating Resources like buckets, user pools, IAMs etc.
+resources:
+  - ${file(resources/cognito.yml)}
+# Packaging information can be added here
+package:
+  individually: true
+  exclude:
+    - "**/*" 
+  # include:
+  #   - "functions/_const.json"
+
+# Functions represent Lambdas, "http"-events are Gateway-resources
+functions:
+  subscriptions:
+    handler: functions/subscriptions.handler
+    environment:
+      USER_POOL_ID: ${self:custom.constants.UserPoolId}
+    role:  ${self:custom.constants.SubscriptionRole}
+    package:
+      include:
+        - functions/subscriptions.js
+        - functions/_const.json
+    events:
+      - http: 
+          path: subscriptions
+          method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: true  
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: 
+              Ref: CognitoAuthorizer
+
+  mail:
+    handler: functions/mail.handler
+    environment:
+      FRONTENDURL: ${self:custom.constants.WebsiteURL}
+    package:
+      include:
+        - functions/mail.js
+        - functions/_const.json
+    role: ${self:custom.constants.MailRole}
+    # The following is now set via the postDeploy task in gulp
+    # events:
+    #   - cognitoUserPool:
+    #       trigger: CustomMessage
+
+  cleverbridge:
+    handler: functions/reseller.handler
+    environment:
+      USER_POOL_ID:  ${self:custom.constants.UserPoolId}
+      FRONTENDURL: ${self:custom.constants.WebsiteURL}
+    package:
+      include:
+        - functions/reseller.js
+        - functions/_const.json
+    role:  ${self:custom.constants.ResellerRole}
+    events:
+      - http:
+          path: cleverbridge
+          method: post
+          cors: true
+
+  purchaseVerify:
+    handler: functions/purchase-verify.handler
+    package:
+      include:
+        - functions/purchase-verify.js
+        - functions/_const.json
+    role:  ${self:custom.constants.SubscriptionRole}
+    events:
+      - http:
+          path: purchase/verify/{id}/{key}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                id: true
+                key: true
+
+  purchaseAssign:
+    handler: functions/purchase-assign.handler
+    package:
+      include:
+        - functions/purchase-assign.js
+        - functions/_const.json
+    role:  ${self:custom.constants.AssignRole}
+    events:
+      - http:
+          path: purchase/assign
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: 
+              Ref: CognitoAuthorizer
+  
+  userVerify:
+    handler: functions/user-verify.handler
+    environment:
+      USER_POOL_ID: ${self:custom.constants.UserPoolId}
+    package:
+      include:
+        - functions/user-verify.js
+        - functions/_const.json
+    role: ${self:custom.constants.UserVerifyRole}
+    events:
+      - http:
+          path: user/verify
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: true  

@@ -1,0 +1,49 @@
+Resources:
+  CognitoUserPoolUserPool:
+    Type: "AWS::Cognito::UserPool"
+    Properties:
+      UserPoolName: ${self:custom.userPoolName}
+      AutoVerifiedAttributes:
+        - email
+      SmsVerificationMessage: "Your verification code is {####}."
+      MfaConfiguration: "OFF"
+      EmailVerificationSubject: "Your Key"
+      EmailVerificationMessage: "Your verification code is {####}."
+      SmsAuthenticationMessage: "Your verification code is {####}."
+      UsernameAttributes:
+        - email
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+      Policies:
+        PasswordPolicy:
+          RequireLowercase: true
+          RequireSymbols: false
+          RequireNumbers: true
+          MinimumLength: 8
+          RequireUppercase: true
+      AdminCreateUserConfig:
+        InviteMessageTemplate:
+          EmailMessage: "Your username is {username} and temporary password is {####}."
+          EmailSubject: "Your temporary password"
+          SMSMessage: "Your username is {username} and temporary password is {####}."
+        UnusedAccountValidityDays: 7
+        AllowAdminCreateUserOnly: false
+
+  UserPoolFrontendClient:
+    Type: "AWS::Cognito::UserPoolClient"
+    Properties:
+      ClientName: ${self:service}-frontend-client
+      GenerateSecret: false
+      UserPoolId: 
+        Ref: CognitoUserPoolUserPool
+
+  UserPoolBackendClient:
+    Type: "AWS::Cognito::UserPoolClient"
+    Properties:
+      ClientName: ${self:service}-backend-client
+      GenerateSecret: false
+      UserPoolId: 
+        Ref: CognitoUserPoolUserPool
